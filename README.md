@@ -1,4 +1,4 @@
-# Kura Labs Cohort 5- Deployment Workload 5
+# E-Commerce Website Terraform Deployment
 
 
 ---
@@ -9,6 +9,8 @@
 Welcome to Deployment Workload 5! In Workload 4 we built out our infrastructure to increase security and distrubute the resources.  Those are only some aspects of creating a "good system" though.  Let's keep optimizing.
 
 Be sure to document each step in the process and explain WHY each step is important to the pipeline.
+
+A new E-Commerce company wants to deploy their application to AWS Cloud Infrastructure that is secure, available, and fault tolerant.  They also want to utilize Infrastructure as Code as well as a CICD pipeline to be able to spin up or modify infrastructure as needed whenever an update is made to the application source code.  As a growing company they are also looking to leverage data and technology for Business Intelligence to make decisions on where to focus their capital and energy on.
 
 ## Instructions
 
