@@ -1,2 +1,5 @@
 # Ignore these Terraform files
 *.tfvars
+
+# Ignore these Git files
+*credentials

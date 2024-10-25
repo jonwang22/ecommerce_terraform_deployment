@@ -12,7 +12,7 @@ sudo apt install -y python3.9 python3.9-venv python3-pip python3.9-dev
 
 # Installing packages for Terraform
 sudo apt-get update 
-# software-properties-common was already downloaded prior
+# software-properties-common was already downloaded prior, removing from this command.
 # Instructions to install are found here https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli
 sudo apt-get install -y gnupg 
 
