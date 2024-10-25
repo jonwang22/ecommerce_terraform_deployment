@@ -12,9 +12,9 @@ sudo apt install -y python3.9 python3.9-venv python3-pip python3.9-dev
 
 # Installing packages for Terraform
 sudo apt-get update 
-
-# software-properties-common was already downloaded prior but leaving here for information sake
-sudo apt-get install -y gnupg software-properties-common 
+# software-properties-common was already downloaded prior
+# Instructions to install are found here https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli
+sudo apt-get install -y gnupg 
 
 # Installing Hashicorp GPG key
 wget -O- https://apt.releases.hashicorp.com/gpg | \

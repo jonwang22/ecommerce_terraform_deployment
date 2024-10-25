@@ -1,0 +1,2 @@
+# Ignore these Terraform files
+*.tfvars
