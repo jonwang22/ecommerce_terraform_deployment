@@ -1,5 +1,7 @@
 # Ignore these Terraform files
 *.tfvars
+.terraform
+*.terraform.lock*
 
 # Ignore these Git files
 *credentials
