@@ -57,6 +57,12 @@ resource "aws_security_group" "frontend_sg" { # aws_security_group is the actual
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+  ingress {
+    from_port   = 9100
+    to_port     = 9100
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
   # Egress rules: Define outbound traffic that is allowed. The below configuration allows all outbound traffic from the instance.
   egress {
     from_port   = 0                                     # Allow all outbound traffic (from port 0 to any port)
@@ -129,6 +135,12 @@ resource "aws_security_group" "backend_sg" { # aws_security_group is the actual 
     to_port     = 8000
     protocol    = "tcp"
     cidr_blocks = ["10.0.0.0/20"]
+  }
+  ingress {
+    from_port   = 9100
+    to_port     = 9100
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
   # Egress rules: Define outbound traffic that is allowed. The below configuration allows all outbound traffic from the instance.
   egress {

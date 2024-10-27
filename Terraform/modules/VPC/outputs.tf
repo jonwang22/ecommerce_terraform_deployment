@@ -4,6 +4,9 @@
 output "wl5vpc_id" {
   value = aws_vpc.wl5vpc.id  # Display the VPC ID.
 }
+output "default_vpc_id" {
+  value = data.aws_vpc.default.id
+}
 output "public_subnet_1_id" {
   value = aws_subnet.public_subnet_1.id  # Display public subnet ID.
 }

@@ -11,6 +11,12 @@ resource "aws_vpc" "wl5vpc" {
   }
 }
 
+# Setting Default VPC
+data "aws_vpc" "default" {
+  default = true
+}
+
+
 ##################################################
 ### SUBNETS ###
 ##################################################
@@ -72,6 +78,14 @@ resource "aws_internet_gateway" "wl5igw" {
   }
 }
 
+# Get the Internet Gateway associated with the default VPC
+data "aws_internet_gateway" "default" {
+  filter {
+    name   = "attachment.vpc-id"
+    values = [data.aws_vpc.default.id]
+    }
+}
+
 # Creating EIP for NAT Gateway 1
 resource "aws_eip" "wl5_nat_eip_1" {
   domain = "vpc"
@@ -121,7 +135,7 @@ resource "aws_nat_gateway" "nat_gateway_2" {
 ##################################################
 ### ROUTE TABLES ###
 ##################################################
-# Creating a custom Route Table for Public Subnet, assigning route for IGW
+# Creating Public Route Table for Public Subnet, assigning route for IGW
 resource "aws_route_table" "public_routetable" {
   vpc_id = aws_vpc.wl5vpc.id
 
@@ -144,6 +158,11 @@ resource "aws_route_table" "private_routetable_1" {
     nat_gateway_id = aws_nat_gateway.nat_gateway_1.id
   }
 
+  route {
+    cidr_block = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.nat_gateway_2.id
+  }
+
   tags = {
     Name = "WL5 Private Route Table 1"
   }
@@ -155,6 +174,11 @@ resource "aws_route_table" "private_routetable_2" {
 
   route {
     cidr_block = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.nat_gateway_1.id
+  }
+
+  route {
+    cidr_block = "0.0.0.0/0"
     nat_gateway_id = aws_nat_gateway.nat_gateway_2.id
   }
 
@@ -162,9 +186,22 @@ resource "aws_route_table" "private_routetable_2" {
     Name = "WL5 Private Route Table 2"
   }
 }
+
 ##################################################
 ### ROUTE TABLES ASSOCIATIONS ###
 ##################################################
+# Access the Default Route Table
+resource "aws_default_route_table" "default" {
+  default_route_table_id = data.aws_vpc.default.main_route_table_id
+
+  # Add route for VPC peering
+  route {
+    cidr_block                = aws_vpc.wl5vpc.cidr_block # Adjust based on peer VPC
+    vpc_peering_connection_id = aws_vpc_peering_connection.wl5peering.id
+  }
+}
+
+
 # Associating Public Subnets to Public Route Table
 resource "aws_route_table_association" "Public_Subnet_Association1" {
   subnet_id      = aws_subnet.public_subnet_1.id
@@ -185,4 +222,21 @@ resource "aws_route_table_association" "Private_Subnet_1_Association" {
 resource "aws_route_table_association" "Private_Subnet_2_Association" {
   subnet_id      = aws_subnet.private_subnet_2.id
   route_table_id = aws_route_table.private_routetable_2.id
+}
+
+##################################################
+### VPC PEERING ###
+##################################################
+resource "aws_vpc_peering_connection" "wl5peering" {
+  peer_vpc_id   = aws_vpc.wl5vpc.id
+  vpc_id        = data.aws_vpc.default.id
+  auto_accept   = true
+
+  accepter {
+    allow_remote_vpc_dns_resolution = true
+  }
+
+  requester {
+    allow_remote_vpc_dns_resolution = true
+  }
 }
