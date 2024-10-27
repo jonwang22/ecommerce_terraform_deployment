@@ -13,6 +13,16 @@ module "VPC" {
   source = "./modules/VPC/"
 }
 
-# module "EC2" {
-#   source = "./modules/EC2/"
-# }
+module "EC2" {
+  source = "./modules/EC2/"
+  wl5vpc_id = module.VPC.wl5vpc_id
+  public_subnet_1_id = module.VPC.public_subnet_1_id
+  public_subnet_2_id = module.VPC.public_subnet_2_id
+  private_subnet_1_id = module.VPC.private_subnet_1_id
+  private_subnet_2_id = module.VPC.private_subnet_2_id
+}
+
+module "RDS" {
+  source = "./modules/RDS/"
+  
+}
