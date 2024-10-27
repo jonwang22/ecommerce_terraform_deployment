@@ -24,5 +24,11 @@ module "EC2" {
 
 module "RDS" {
   source = "./modules/RDS/"
-  
+  wl5vpc_id = module.VPC.wl5vpc_id
+  backend_sg = module.EC2.backend_sg
+  db_name = var.db_name
+  db_username = var.db_username
+  db_password = var.db_password
+  private_subnet_1_id = module.VPC.private_subnet_1_id
+  private_subnet_2_id = module.VPC.private_subnet_2_id
 }

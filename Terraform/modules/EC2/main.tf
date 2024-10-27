@@ -76,7 +76,7 @@ resource "aws_security_group" "frontend_sg" { # aws_security_group is the actual
 ##################################################
 # Create an EC2 instance in AWS. This resource block defines the configuration of the instance.
 # This EC2 is created in our Public Subnet
-# Frontend AZ1
+# Backend AZ1
 resource "aws_instance" "wl5backend1" {
   ami               = var.ami                          # The Amazon Machine Image (AMI) ID used to launch the EC2 instance.
   instance_type     = var.instance_type                # Specify the desired EC2 instance size.
@@ -93,14 +93,14 @@ resource "aws_instance" "wl5backend1" {
   }
 }
 
-# Frontend AZ2
+# Backend AZ2
 resource "aws_instance" "wl5backend2" {
   ami               = var.ami                          # The Amazon Machine Image (AMI) ID used to launch the EC2 instance.
   instance_type     = var.instance_type                # Specify the desired EC2 instance size.
   subnet_id         = var.private_subnet_2_id
   # Attach an existing security group to the instance.
   # Security groups control the inbound and outbound traffic to your EC2 instance.
-  vpc_security_group_ids = [aws_security_group.frontend_sg.id]         # Replace with the security group ID, e.g., "sg-01297adb7229b5f08".
+  vpc_security_group_ids = [aws_security_group.backend_sg.id]         # Replace with the security group ID, e.g., "sg-01297adb7229b5f08".
   key_name          = "WL5Access"                # The key pair name for SSH access to the instance.
   #user_data         = "${file("install_jenkins.sh")}"
   
