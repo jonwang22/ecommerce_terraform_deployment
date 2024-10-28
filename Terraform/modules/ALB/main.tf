@@ -68,7 +68,7 @@ resource "aws_lb_listener" "http_listener" {
 resource "aws_lb_target_group" "alb_tg" {
   name     = "WL5-TargetGroup"
   port     = 3000
-  protocol = "TCP"
+  protocol = "HTTP"
   vpc_id   = var.wl5vpc_id
 
   health_check {

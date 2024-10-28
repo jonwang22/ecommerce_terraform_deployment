@@ -11,12 +11,6 @@ resource "aws_vpc" "wl5vpc" {
   }
 }
 
-# Setting Default VPC
-data "aws_vpc" "default" {
-  default = true
-}
-
-
 ##################################################
 ### SUBNETS ###
 ##################################################
@@ -156,6 +150,11 @@ resource "aws_route_table" "public_routetable" {
     gateway_id = aws_internet_gateway.wl5igw.id
   }
 
+  route {
+    cidr_block                = data.aws_vpc.default.cidr_block
+    vpc_peering_connection_id = aws_vpc_peering_connection.wl5peering.id
+  }
+
   tags = {
     Name = "WL5 Public Route Table"
   }
@@ -168,6 +167,11 @@ resource "aws_route_table" "private_routetable_1" {
   route {
     cidr_block = "0.0.0.0/0"
     nat_gateway_id = aws_nat_gateway.nat_gateway_1.id
+  }
+
+  route {
+    cidr_block                = data.aws_vpc.default.cidr_block
+    vpc_peering_connection_id = aws_vpc_peering_connection.wl5peering.id
   }
 
   tags = {
@@ -184,21 +188,16 @@ resource "aws_route_table" "private_routetable_2" {
     nat_gateway_id = aws_nat_gateway.nat_gateway_2.id
   }
 
+  route {
+    cidr_block                = data.aws_vpc.default.cidr_block
+    vpc_peering_connection_id = aws_vpc_peering_connection.wl5peering.id
+  }
+
   tags = {
     Name = "WL5 Private Route Table 2"
   }
 }
 
-# Access the Default Route Table
-resource "aws_default_route_table" "default" {
-  default_route_table_id = data.aws_vpc.default.main_route_table_id
-
-  # Add route for VPC peering
-  route {
-    cidr_block                = aws_vpc.wl5vpc.cidr_block # Adjust based on peer VPC
-    vpc_peering_connection_id = aws_vpc_peering_connection.wl5peering.id
-  }
-}
 ##################################################
 ### ROUTE TABLES ASSOCIATIONS ###
 ##################################################
@@ -231,4 +230,24 @@ resource "aws_vpc_peering_connection" "wl5peering" {
   peer_vpc_id   = aws_vpc.wl5vpc.id
   vpc_id        = data.aws_vpc.default.id
   auto_accept   = true
+}
+
+##################################################
+### DEFAULT VPC ###
+##################################################
+# Setting Default VPC
+data "aws_vpc" "default" {
+  default = true
+}
+
+# Data source to access the default route table of the default VPC
+data "aws_route_table" "default" {
+  vpc_id = data.aws_vpc.default.id
+}
+
+# Add a route for VPC peering to the default route table
+resource "aws_route" "vpc_peering_route" {
+  route_table_id            = data.aws_route_table.default.id
+  destination_cidr_block    = aws_vpc.wl5vpc.cidr_block  # Adjust based on peer VPC
+  vpc_peering_connection_id  = aws_vpc_peering_connection.wl5peering.id
 }

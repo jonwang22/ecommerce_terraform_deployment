@@ -2,7 +2,7 @@
 *.tfvars
 .terraform
 *.terraform.lock*
-*.tfstate
+*.tfstate*
 
 # Ignore these Git files
 *credentials

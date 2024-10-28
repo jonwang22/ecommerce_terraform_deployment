@@ -103,7 +103,7 @@ resource "aws_instance" "wl5backend1" {
   
   # Tagging the resource with a Name label. Tags help in identifying and organizing resources in AWS.
   tags = {
-    "Name" : "ecommerce_frontend_az1"
+    "Name" : "ecommerce_backend_az1"
   }
 }
 
@@ -120,7 +120,7 @@ resource "aws_instance" "wl5backend2" {
   
   # Tagging the resource with a Name label. Tags help in identifying and organizing resources in AWS.
   tags = {
-    "Name" : "ecommerce_frontend_az2"
+    "Name" : "ecommerce_backend_az2"
   }
 }
 
