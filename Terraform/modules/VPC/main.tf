@@ -20,6 +20,18 @@ data "aws_vpc" "default" {
 ##################################################
 ### SUBNETS ###
 ##################################################
+# resource "aws_subnet" "public" {
+#   count                   = 2
+#   vpc_id                  = aws_vpc.main.id
+#   cidr_block              = cidrsubnet(aws_vpc.main.cidr_block, 3, count.index)
+#   availability_zone       = element(data.aws_availability_zones.available.names, count.index)
+#   map_public_ip_on_launch = true
+
+#   tags = {
+#     Name = "Public-Subnet-${count.index + 1}"
+#   }
+# }
+
 # Creating Public Subnet in USE1a
 resource "aws_subnet" "public_subnet_1" {
   vpc_id     = aws_vpc.wl5vpc.id
@@ -158,11 +170,6 @@ resource "aws_route_table" "private_routetable_1" {
     nat_gateway_id = aws_nat_gateway.nat_gateway_1.id
   }
 
-  route {
-    cidr_block = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.nat_gateway_2.id
-  }
-
   tags = {
     Name = "WL5 Private Route Table 1"
   }
@@ -174,11 +181,6 @@ resource "aws_route_table" "private_routetable_2" {
 
   route {
     cidr_block = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.nat_gateway_1.id
-  }
-
-  route {
-    cidr_block = "0.0.0.0/0"
     nat_gateway_id = aws_nat_gateway.nat_gateway_2.id
   }
 
@@ -187,9 +189,6 @@ resource "aws_route_table" "private_routetable_2" {
   }
 }
 
-##################################################
-### ROUTE TABLES ASSOCIATIONS ###
-##################################################
 # Access the Default Route Table
 resource "aws_default_route_table" "default" {
   default_route_table_id = data.aws_vpc.default.main_route_table_id
@@ -200,8 +199,9 @@ resource "aws_default_route_table" "default" {
     vpc_peering_connection_id = aws_vpc_peering_connection.wl5peering.id
   }
 }
-
-
+##################################################
+### ROUTE TABLES ASSOCIATIONS ###
+##################################################
 # Associating Public Subnets to Public Route Table
 resource "aws_route_table_association" "Public_Subnet_Association1" {
   subnet_id      = aws_subnet.public_subnet_1.id
@@ -231,12 +231,4 @@ resource "aws_vpc_peering_connection" "wl5peering" {
   peer_vpc_id   = aws_vpc.wl5vpc.id
   vpc_id        = data.aws_vpc.default.id
   auto_accept   = true
-
-  accepter {
-    allow_remote_vpc_dns_resolution = true
-  }
-
-  requester {
-    allow_remote_vpc_dns_resolution = true
-  }
 }

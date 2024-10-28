@@ -1,4 +1,12 @@
 ##################################################
+### SSH KEY ###
+##################################################
+resource "aws_key_pair" "ssh_key_pair" {
+  key_name   = "ecommerce"
+  public_key = file("~/.ssh/ecommerce.pub")  # Path to your public key file
+}
+
+##################################################
 ### FRONTEND ###
 ##################################################
 # Create an EC2 instance in AWS. This resource block defines the configuration of the instance.
@@ -11,7 +19,7 @@ resource "aws_instance" "wl5frontend1" {
   # Attach an existing security group to the instance.
   # Security groups control the inbound and outbound traffic to your EC2 instance.
   vpc_security_group_ids = [aws_security_group.frontend_sg.id]         # Replace with the security group ID, e.g., "sg-01297adb7229b5f08".
-  key_name          = "WL5Access"                # The key pair name for SSH access to the instance.
+  key_name          = "ecommerce"                # The key pair name for SSH access to the instance.
   #user_data         = "${file("install_jenkins.sh")}"
   
   # Tagging the resource with a Name label. Tags help in identifying and organizing resources in AWS.
@@ -28,7 +36,7 @@ resource "aws_instance" "wl5frontend2" {
   # Attach an existing security group to the instance.
   # Security groups control the inbound and outbound traffic to your EC2 instance.
   vpc_security_group_ids = [aws_security_group.frontend_sg.id]         # Replace with the security group ID, e.g., "sg-01297adb7229b5f08".
-  key_name          = "WL5Access"                # The key pair name for SSH access to the instance.
+  key_name          = "ecommerce"                # The key pair name for SSH access to the instance.
   #user_data         = "${file("install_jenkins.sh")}"
   
   # Tagging the resource with a Name label. Tags help in identifying and organizing resources in AWS.
@@ -90,7 +98,7 @@ resource "aws_instance" "wl5backend1" {
   # Attach an existing security group to the instance.
   # Security groups control the inbound and outbound traffic to your EC2 instance.
   vpc_security_group_ids = [aws_security_group.backend_sg.id]         # Replace with the security group ID, e.g., "sg-01297adb7229b5f08".
-  key_name          = "WL5Access"                # The key pair name for SSH access to the instance.
+  key_name          = "ecommerce"                # The key pair name for SSH access to the instance.
   #user_data         = "${file("install_jenkins.sh")}"
   
   # Tagging the resource with a Name label. Tags help in identifying and organizing resources in AWS.
@@ -107,7 +115,7 @@ resource "aws_instance" "wl5backend2" {
   # Attach an existing security group to the instance.
   # Security groups control the inbound and outbound traffic to your EC2 instance.
   vpc_security_group_ids = [aws_security_group.backend_sg.id]         # Replace with the security group ID, e.g., "sg-01297adb7229b5f08".
-  key_name          = "WL5Access"                # The key pair name for SSH access to the instance.
+  key_name          = "ecommerce"                # The key pair name for SSH access to the instance.
   #user_data         = "${file("install_jenkins.sh")}"
   
   # Tagging the resource with a Name label. Tags help in identifying and organizing resources in AWS.
