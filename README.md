@@ -241,6 +241,12 @@ Note 3: You can do this with the RDS password as well.  The "terraform plan" com
 
 	  d. "ISSUES/TROUBLESHOOTING" that may have occured,
 
+		```
+		* Proxy error: Could not proxy request /api/products/ from 44.211.212.52:3000 to http://10.0.1.92:8000.
+		See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+		```
+   		
+
   	e. An "OPTIMIZATION" section for how you think this workload/infrastructure/CICD pipeline, etc. can be optimized further.  
 
     f. A "BUSINESS INTELLIGENCE" section for the questions below,
