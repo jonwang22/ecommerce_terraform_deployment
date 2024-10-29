@@ -241,17 +241,80 @@ Note 3: You can do this with the RDS password as well.  The "terraform plan" com
 
 	  d. "ISSUES/TROUBLESHOOTING" that may have occured,
 
-		```
-		* Proxy error: Could not proxy request /api/products/ from 44.211.212.52:3000 to http://10.0.1.92:8000.
-		See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
-		```
-   		
+```
+* Proxy error: Could not proxy request /api/products/ from 44.211.212.52:3000 to http://10.0.1.92:8000.
+See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
+```
 
-  	e. An "OPTIMIZATION" section for how you think this workload/infrastructure/CICD pipeline, etc. can be optimized further.  
+```
+Traceback (most recent call last):
 
-    f. A "BUSINESS INTELLIGENCE" section for the questions below,
+File "/home/ubuntu/ecommerce_terraform_deployment/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 84, in _execute
+    return self.cursor.execute(sql, params)
+psycopg2.errors.StringDataRightTruncation: value too long for type character varying(16)
 
-    g. A "CONCLUSION" statement as well as any other sections you feel like you want to include.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/ecommerce_terraform_deployment/backend/manage.py", line 22, in <module>
+    main()
+  File "/home/ubuntu/ecommerce_terraform_deployment/backend/manage.py", line 18, in main
+    execute_from_command_line(sys.argv)
+  File "/home/ubuntu/ecommerce_terraform_deployment/venv/lib/python3.9/site-packages/django/core/management/__init__.py", line 419, in execute_from_command_line
+    utility.execute()
+  File "/home/ubuntu/ecommerce_terraform_deployment/venv/lib/python3.9/site-packages/django/core/management/__init__.py", line 413, in execute
+    self.fetch_command(subcommand).run_from_argv(self.argv)
+  File "/home/ubuntu/ecommerce_terraform_deployment/venv/lib/python3.9/site-packages/django/core/management/base.py", line 354, in run_from_argv
+    self.execute(*args, **cmd_options)
+  File "/home/ubuntu/ecommerce_terraform_deployment/venv/lib/python3.9/site-packages/django/core/management/base.py", line 398, in execute
+    output = self.handle(*args, **options)
+  File "/home/ubuntu/ecommerce_terraform_deployment/venv/lib/python3.9/site-packages/django/core/management/commands/loaddata.py", line 78, in handle
+    self.loaddata(fixture_labels)
+  File "/home/ubuntu/ecommerce_terraform_deployment/venv/lib/python3.9/site-packages/django/core/management/commands/loaddata.py", line 123, in loaddata
+    self.load_label(fixture_label)
+  File "/home/ubuntu/ecommerce_terraform_deployment/venv/lib/python3.9/site-packages/django/core/management/commands/loaddata.py", line 190, in load_label
+    obj.save(using=self.using)
+  File "/home/ubuntu/ecommerce_terraform_deployment/venv/lib/python3.9/site-packages/django/core/serializers/base.py", line 223, in save
+    models.Model.save_base(self.object, using=using, raw=True, **kwargs)
+  File "/home/ubuntu/ecommerce_terraform_deployment/venv/lib/python3.9/site-packages/django/db/models/base.py", line 763, in save_base
+    updated = self._save_table(
+  File "/home/ubuntu/ecommerce_terraform_deployment/venv/lib/python3.9/site-packages/django/db/models/base.py", line 845, in _save_table
+    updated = self._do_update(base_qs, using, pk_val, values, update_fields,
+  File "/home/ubuntu/ecommerce_terraform_deployment/venv/lib/python3.9/site-packages/django/db/models/base.py", line 899, in _do_update
+    return filtered._update(values) > 0
+  File "/home/ubuntu/ecommerce_terraform_deployment/venv/lib/python3.9/site-packages/django/db/models/query.py", line 802, in _update
+    return query.get_compiler(self.db).execute_sql(CURSOR)
+  File "/home/ubuntu/ecommerce_terraform_deployment/venv/lib/python3.9/site-packages/django/db/models/sql/compiler.py", line 1559, in execute_sql
+    cursor = super().execute_sql(result_type)
+  File "/home/ubuntu/ecommerce_terraform_deployment/venv/lib/python3.9/site-packages/django/db/models/sql/compiler.py", line 1175, in execute_sql
+    cursor.execute(sql, params)
+  File "/home/ubuntu/ecommerce_terraform_deployment/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 98, in execute
+    return super().execute(sql, params)
+  File "/home/ubuntu/ecommerce_terraform_deployment/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 66, in execute
+    return self._execute_with_wrappers(sql, params, many=False, executor=self._execute)
+  File "/home/ubuntu/ecommerce_terraform_deployment/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 75, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "/home/ubuntu/ecommerce_terraform_deployment/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 84, in _execute
+    return self.cursor.execute(sql, params)
+  File "/home/ubuntu/ecommerce_terraform_deployment/venv/lib/python3.9/site-packages/django/db/utils.py", line 90, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/home/ubuntu/ecommerce_terraform_deployment/venv/lib/python3.9/site-packages/django/db/backends/utils.py", line 84, in _execute
+    return self.cursor.execute(sql, params)
+django.db.utils.DataError: Problem installing fixture '/home/ubuntu/ecommerce_terraform_deployment/backend/datadump.json': Could not load account.StripeModel(pk=140): value too long for
+ type character varying(16)
+
+Failed to load datadump.json
+2024-10-29 14:39:35,624 - cc_scripts_user.py[WARNING]: Failed to run module scripts_user (scripts in /var/lib/cloud/instance/scripts)
+2024-10-29 14:39:35,624 - util.py[WARNING]: Running module scripts_user (<module 'cloudinit.config.cc_scripts_user' from '/usr/lib/python3/dist-packages/cloudinit/config/cc_scripts_user
+.py'>) failed
+```   		
+
+  e. An "OPTIMIZATION" section for how you think this workload/infrastructure/CICD pipeline, etc. can be optimized further.  
+
+  f. A "BUSINESS INTELLIGENCE" section for the questions below,
+
+  g. A "CONCLUSION" statement as well as any other sections you feel like you want to include.
 
 ## Business Intelligence
 
