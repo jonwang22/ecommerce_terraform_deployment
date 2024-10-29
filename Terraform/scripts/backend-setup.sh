@@ -80,7 +80,7 @@ pip install --upgrade pip
 echo "Installing all necessary application dependencies..."
 pip install -r /home/ubuntu/ecommerce_terraform_deployment/backend/requirements.txt
 
-backend_private_ip=$(hostname -I)
+backend_private_ip=$(hostname -i | awk '{print $1}')
 
 # Configuring Allowed Hosts in settings.py
 sed -i "s/ALLOWED_HOSTS = \[\]/ALLOWED_HOSTS = \['$backend_private_ip'\]/" /home/ubuntu/ecommerce_terraform_deployment/backend/my_project/settings.py || { echo "Backend Private IP failed to update."; exit 1; }
