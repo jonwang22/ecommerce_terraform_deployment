@@ -93,9 +93,9 @@ sed -i "s/'HOST': 'your-rds-endpoint.amazonaws.com'/'HOST': '${rds_address}'/g" 
 
 #Create the tables in RDS: 
 cd /home/ubuntu/ecommerce_terraform_deployment/backend/
-python manage.py makemigrations account || { echo "Migrations for accounts failed."; exit 1; }
-python manage.py makemigrations payments || { echo "Migrations for payments failed."; exit 1; }
-python manage.py makemigrations product || { echo "Migrations for product failed."; exit 1; }
+python manage.py makemigrations account || { echo "Creation for accounts failed."; exit 1; }
+python manage.py makemigrations payments || { echo "Creation for payments failed."; exit 1; }
+python manage.py makemigrations product || { echo "Creation for product failed."; exit 1; }
 python manage.py migrate || { echo "Migration failed."; exit 1; }
 
 #Migrate the data from SQLite file to RDS:
