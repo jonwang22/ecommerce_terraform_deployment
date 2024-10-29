@@ -111,7 +111,7 @@ resource "aws_instance" "wl5backend1" {
   # Security groups control the inbound and outbound traffic to your EC2 instance.
   vpc_security_group_ids = [aws_security_group.backend_sg.id]         # Replace with the security group ID, e.g., "sg-01297adb7229b5f08".
   key_name          = "ecommerce"                # The key pair name for SSH access to the instance.
-  user_data         = templatefile("${path.root}/scripts/backend-setup.sh", 
+  user_data         = templatefile("${path.root}/scripts/backend-setup-db-migrate.sh", 
     {
       db_name = var.db_name
       db_username = var.db_username
