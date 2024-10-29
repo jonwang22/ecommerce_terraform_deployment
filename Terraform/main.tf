@@ -29,7 +29,7 @@ module "EC2" {
   public_subnet_2_id = module.VPC.public_subnet_2_id
   private_subnet_1_id = module.VPC.private_subnet_1_id
   private_subnet_2_id = module.VPC.private_subnet_2_id
-  rds_endpoint = module.RDS.rds_endpoint
+  rds_address = module.RDS.rds_address
   db_name = var.db_name
   db_username = var.db_username
   db_password = var.db_password

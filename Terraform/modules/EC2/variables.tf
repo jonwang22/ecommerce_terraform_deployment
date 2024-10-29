@@ -23,7 +23,7 @@ variable ami {
 }
 
 ### RDS VARIABLES
-variable rds_endpoint {}
+variable rds_address {}
 variable db_name {}
 variable db_username {}
 variable db_password {}

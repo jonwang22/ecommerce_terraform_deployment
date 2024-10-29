@@ -20,8 +20,9 @@ resource "aws_instance" "wl5frontend1" {
   # Security groups control the inbound and outbound traffic to your EC2 instance.
   vpc_security_group_ids = [aws_security_group.frontend_sg.id]         # Replace with the security group ID, e.g., "sg-01297adb7229b5f08".
   key_name          = "ecommerce"                # The key pair name for SSH access to the instance.
-  user_data         = templatefile("${path.root}/scripts/frontend-setup.sh", {
-    backend_private_ip = aws_instance.wl5backend1.private_ip
+  user_data         = templatefile("${path.root}/scripts/frontend-setup.sh", 
+    {
+      backend_private_ip = aws_instance.wl5backend1.private_ip
   })
   
   # Depends on RDS Instance to be created.
@@ -42,8 +43,9 @@ resource "aws_instance" "wl5frontend2" {
   # Security groups control the inbound and outbound traffic to your EC2 instance.
   vpc_security_group_ids = [aws_security_group.frontend_sg.id]         # Replace with the security group ID, e.g., "sg-01297adb7229b5f08".
   key_name          = "ecommerce"                # The key pair name for SSH access to the instance.
-  user_data         = templatefile("${path.root}/scripts/frontend-setup.sh", {
-    backend_private_ip = aws_instance.wl5backend2.private_ip
+  user_data         = templatefile("${path.root}/scripts/frontend-setup.sh", 
+    {
+      backend_private_ip = aws_instance.wl5backend2.private_ip
   })
   
   # Depends on RDS Instance to be created.
@@ -109,11 +111,12 @@ resource "aws_instance" "wl5backend1" {
   # Security groups control the inbound and outbound traffic to your EC2 instance.
   vpc_security_group_ids = [aws_security_group.backend_sg.id]         # Replace with the security group ID, e.g., "sg-01297adb7229b5f08".
   key_name          = "ecommerce"                # The key pair name for SSH access to the instance.
-  user_data         = templatefile("${path.root}/scripts/backend-setup.sh", {
-    db_name = var.db_name
-    db_username = var.db_username
-    db_password = var.db_password
-    rds_endpoint = var.rds_endpoint
+  user_data         = templatefile("${path.root}/scripts/backend-setup.sh", 
+    {
+      db_name = var.db_name
+      db_username = var.db_username
+      db_password = var.db_password
+      rds_address = var.rds_address
   })
 
   # Depends on RDS Instance to be created.
@@ -134,11 +137,12 @@ resource "aws_instance" "wl5backend2" {
   # Security groups control the inbound and outbound traffic to your EC2 instance.
   vpc_security_group_ids = [aws_security_group.backend_sg.id]         # Replace with the security group ID, e.g., "sg-01297adb7229b5f08".
   key_name          = "ecommerce"                # The key pair name for SSH access to the instance.
-  user_data         = templatefile("${path.root}/scripts/backend-setup.sh", {
-    db_name = var.db_name
-    db_username = var.db_username
-    db_password = var.db_password
-    rds_endpoint = var.rds_endpoint
+  user_data         = templatefile("${path.root}/scripts/backend-setup.sh", 
+    {
+      db_name = var.db_name
+      db_username = var.db_username
+      db_password = var.db_password
+      rds_address = var.rds_address
   })
   
   # Depends on RDS Instance to be created.
