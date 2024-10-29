@@ -14,11 +14,12 @@ echo "$SSH_PUB_KEY" >> ~/.ssh/authorized_keys
 sudo apt install wget -y
 
 # Download and install Node Exporter
+
 NODE_EXPORTER_VERSION="1.5.0"
-wget https://github.com/prometheus/node_exporter/releases/download/v${NODE_EXPORTER_VERSION}/node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64.tar.gz
-tar xvfz node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64.tar.gz
-sudo mv node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64/node_exporter /usr/local/bin/
-rm -rf node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64*
+wget https://github.com/prometheus/node_exporter/releases/download/v$NODE_EXPORTER_VERSION/node_exporter-$NODE_EXPORTER_VERSION.linux-amd64.tar.gz
+tar xvfz node_exporter-$NODE_EXPORTER_VERSION.linux-amd64.tar.gz
+sudo mv node_exporter-$NODE_EXPORTER_VERSION.linux-amd64/node_exporter /usr/local/bin/
+rm -rf node_exporter-$NODE_EXPORTER_VERSION.linux-amd64*
 
 # Create a Node Exporter user
 sudo useradd --no-create-home --shell /bin/false node_exporter

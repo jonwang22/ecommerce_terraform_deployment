@@ -33,6 +33,7 @@ module "EC2" {
   db_name = var.db_name
   db_username = var.db_username
   db_password = var.db_password
+  rds_db = module.RDS.rds_db
 }
 
 module "RDS" {
