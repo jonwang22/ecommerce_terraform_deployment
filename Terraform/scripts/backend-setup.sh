@@ -91,7 +91,8 @@ sed -i "s/'USER': 'your_username'/'USER': '${db_username}'/g" /home/ubuntu/ecomm
 sed -i "s/'PASSWORD': 'your_password'/'PASSWORD': '${db_password}'/g" /home/ubuntu/ecommerce_terraform_deployment/backend/my_project/settings.py || { echo "DB Password failed to update."; exit 1; }
 sed -i "s/'HOST': 'your-rds-endpoint.amazonaws.com'/'HOST': '${rds_address}'/g" /home/ubuntu/ecommerce_terraform_deployment/backend/my_project/settings.py || { echo "DB Host Address failed to update."; exit 1; }
 
-# Creating tables in RDS and connecting to RDS 
+# Creating tables in RDS and connecting to RDS
+cd /home/ubuntu/ecommerce_terraform_deployment/backend/
 python manage.py makemigrations account
 python manage.py makemigrations payments
 python manage.py makemigrations product
