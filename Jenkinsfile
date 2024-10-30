@@ -51,6 +51,7 @@ pipeline {
                             dir('Terraform') {
                               sh 'terraform destroy -auto-approve -var="access_key=${access_key}" -var="secret_key=${secret_key}" -var="db_password=${db_password}"' 
                             }
+          }
         }
       }
      
