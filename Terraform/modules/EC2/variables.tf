@@ -28,7 +28,7 @@ variable "key_name" {
   default     = "ecommerce"
 }
 
-variable "public_key_path" {}
+# variable "public_key_path" {}
 
 ### RDS VARIABLES
 variable rds_address {}

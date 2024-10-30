@@ -2,13 +2,27 @@
 ### SSH KEY ###
 ##################################################
 # Read the public key from the specified path
-locals {
-  public_key = file(var.public_key_path)
+# //NOT USING THIS FOR NOW BUT LEAVING JUST IN CASE
+# locals {
+#   public_key = file(var.public_key_path)
+# }
+
+# Generate a new SSH key pair
+resource "tls_private_key" "generated_key" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
 }
 
 resource "aws_key_pair" "ssh_key_pair" {
   key_name   = var.key_name
-  public_key = local.public_key  # Path to your public key file
+  public_key = tls_private_key.generated_key.public_key_openssh
+# public_key = local.public_key  # Path to your public key file //LEAVING THIS IN CASE
+}
+
+# Saving private key as local tmp file on Jenkins server.
+resource "local_file" "save_private_key" {
+  content  = tls_private_key.generated_key.private_key_pem
+  filename = "/tmp/terraform_generated_key.pem" # Temporary file
 }
 
 ##################################################
