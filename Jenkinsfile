@@ -42,6 +42,17 @@ pipeline {
             }
         }
       } 
+
+     stage('Terraform Destroy') {
+         steps {
+           withCredentials([string(credentialsId: 'AWS_ACCESS_KEY', variable: 'access_key'), 
+                        string(credentialsId: 'AWS_SECRET_KEY', variable: 'secret_key'),
+                        string(credentialsId: 'db_password', variable: 'db_password')]) {
+                            dir('Terraform') {
+                              sh 'terraform destroy -auto-approve -var="access_key=${access_key}" -var="secret_key=${secret_key}" -var="db_password=${db_password}"' 
+                            }
+        }
+      }
      
       stage('Plan') {
         steps {
