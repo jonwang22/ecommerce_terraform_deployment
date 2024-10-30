@@ -47,115 +47,47 @@ On top of all this we can see what the technologies we'll need to get everything
 
 ### INFRASTRUCTURE AS CODE AND CI/CD PIPELINE
 
-1. Create an EC2 t3.medium called "Jenkins_Terraform" for Jenkins and Terraform.
+1. Create an EC2 t3.medium called "Jenkins_Terraform" for Jenkins and Terraform. To set up my "Jenkins_Terraform" instance, I [used this script.](https://github.com/jonwang22/ecommerce_terraform_deployment/blob/main/Scripts/install_dev_setup.sh)
 
-2. Create terraform file(s) for creating the infrastructure outlined below:
+2. For my Terraform files, I opted to create modules for each component. I have modules for [VPC](https://github.com/jonwang22/ecommerce_terraform_deployment/tree/main/Terraform/modules/VPC), [EC2](https://github.com/jonwang22/ecommerce_terraform_deployment/tree/main/Terraform/modules/EC2), [RDS](https://github.com/jonwang22/ecommerce_terraform_deployment/tree/main/Terraform/modules/RDS), and [ALB](https://github.com/jonwang22/ecommerce_terraform_deployment/tree/main/Terraform/modules/ALB). Below is an outline of the infrastructure and resource blocks that we'll need in order for this app to work.
+  ```
+  ### VPC ###
+  - 1x Custom VPC named "wl5vpc" in us-east-1
+    - 2x Availability Zones, we're using us-east-1a and us-east-1b.
+    - 2x Public Subnets and 2x Private Subnets. One of each in each AZ.
+    - 1x Internet Gateway, 2x NAT Gateways and 2x Elastic IPs to assign to each NAT Gateway, one NAT in each Public Subnet. 
+      (For redundancy purposes in case one AZ goes down.)
+    - 3x Route Tables, 1x Public Route Table for both Public Subnets, 1x Route Table for each Private Subnet due to NAT connection for each Private Subnet.
+    - 4x Route Table Associations.
+      - 2x for Public Subnets to Public Route Table.
+      - 2x for Private Subnets to their respective Private Route Table.
+    - 1x VPC Peering Connection between Default VPC and Custom VPC.
+    - Resources to call Default VPC resources and assign proper routing and associations where needed for the Default VPC to communicate with Custom VPC.
+  
+  ### EC2 ###
+  - 1x SSH Key to use for instances so we can connect to them and troubleshoot if needed.
+  - 2x Frontend Servers, 1x in each Public Subnet, in each AZ.
+    These must be named "ecommerce_frontend_az1" and "ecommerce_frontend_az2" respectively.
+  - 1x Frontend Security Group associated to the Frontend servers.
+  - 2x Backend Servers, 1x in each Private Subnet, in each AZ.
+    These must be named "ecommerce_backend_az1" and "ecommerce_backend_az2" respectively.
+  - 1x Backend Security Group associated to the Backend servers.
 
-```
-- 1x Custom VPC named "wl5vpc" in us-east-1
-- 2x Availability zones in us-east-1a and us-east-1b
-- A private and public subnet in EACH AZ
-- An EC2 in each subnet (EC2s in the public subnets are for the frontend, the EC2s in the private subnets are for the backend) Name the EC2's: "ecommerce_frontend_az1", "ecommerce_backend_az1", "ecommerce_frontend_az2", "ecommerce_backend_az2"
-- A load balancer that will direct the inbound traffic to either of the public subnets.
-- An RDS databse (See next step for more details)
-```
-NOTE 1: This list DOES NOT include ALL of the resource blocks required for this infrastructure.  It is up to you to figure out what other resources need to be included to make this work.
+  ### RDS ###
+  - 1x RDS Postgres DB
+  - 1x RDS Subnet Group, associating to the 2 Backend Private Subnets.
+  - 1x RDS Security Group, determining what ports are open and which addresses can enter those ports.
 
-NOTE 2: Remember that "planning" is always the first step in creating infrastructure.  It is highly recommeded to diagram this infrastructure first so that it can help you organize your terraform file.
+  ### ALB ###
+  - 1x Application Load Balancer
+  - 1x Application Load Balancery Security Group, allowing port 80.
+  - 1x Listener on Port 80
+  - 1x Target Group for Port 3000
+  - 2x Target Group Attachments, 1x for each Frontend Server at port 3000.
+  ```
 
-NOTE 3: Put your terraform files into your GitHub repo in the "Terraform" directory. 
+3. With all the resource blocks written in their respective modules, I needed to determine all my variables and outputs and created variables.tf and outputs.tf for each module. I also created a .tfvars file that holds all my sensitive secrets such as access keys and passwords. If needed, please refer to my terraform code to see what was done. Alot of variables were used and called in root main.tf. The biggest pain point was keeping track of all the outputs needed and dependencies for each resource block. I chose to automate this entire process so the order of creation mattered because certain information like RDS Endpoint isn't known until its created. I set "depends_on" statements for my Backend and Frontend EC2s because they required information like endpoints/private IPs. The flow of dependency went from RDS -> Backend EC2 servers -> Frontend EC2 servers. In order to automate a lot of what I needed to replicate my manual discovery of the tech stack, I used EC2's "User Data" to run scripts. You can find my [3 scripts here](https://github.com/jonwang22/ecommerce_terraform_deployment/tree/main/Terraform/scripts).
 
-3. To add the RDS database to your main.tf, use the following resource blocks:
-
-```
-resource "aws_db_instance" "postgres_db" {
-  identifier           = "ecommerce-db"
-  engine               = "postgres"
-  engine_version       = "14.13"
-  instance_class       = var.db_instance_class
-  allocated_storage    = 20
-  storage_type         = "standard"
-  db_name              = var.db_name
-  username             = var.db_username
-  password             = var.db_password
-  parameter_group_name = "default.postgres14"
-  skip_final_snapshot  = true
-
-  db_subnet_group_name   = aws_db_subnet_group.rds_subnet_group.name
-  vpc_security_group_ids = [aws_security_group.rds_sg.id]
-
-  tags = {
-    Name = "Ecommerce Postgres DB"
-  }
-}
-
-resource "aws_db_subnet_group" "rds_subnet_group" {
-  name       = "rds_subnet_group"
-  subnet_ids = [aws_subnet.private_subnet.id, aws_subnet.private_subnet_2.id]
-
-  tags = {
-    Name = "RDS subnet group"
-  }
-}
-
-resource "aws_security_group" "rds_sg" {
-  name        = "rds_sg"
-  description = "Security group for RDS"
-  vpc_id      = aws_vpc.ecommerce_vpc.id
-
-  ingress {
-    from_port       = 5432
-    to_port         = 5432
-    protocol        = "tcp"
-    security_groups = [aws_security_group.backend_security_group.id]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "RDS Security Group"
-  }
-}
-
-output "rds_endpoint" {
-  value = aws_db_instance.postgres_db.endpoint
-}
-
-```
-NOTE: Modify the above resource blocks as needed to fit your main.tf file.
-
-  you can either hard code the db_name, username, password or use the varables:
-
-```
-variable "db_instance_class" {
-  description = "The instance type of the RDS instance"
-  default     = "db.t3.micro"
-}
-
-variable "db_name" {
-  description = "The name of the database to create when the DB instance is created"
-  type        = string
-  default     = "ecommercedb"
-}
-
-variable "db_username" {
-  description = "Username for the master DB user"
-  type        = string
-  default     = "kurac5user"
-}
-
-variable "db_password" {
-  description = "Password for the master DB user"
-  type        = string
-  default     = "kurac5password"
-}
-```
-NOTE: DO NOT CHANGE THE VALUES OF THE VARIABLES!
 
 4. Edit the Jenkinsfile with the stages: "Build", "Test", "Init", "Plan", and "Apply" that will build the application, test the application (tests have already been created for this workload- the stage just needs to be edited to activate the venv and paths to the files checked), and then run the Terraform commands to create the infrastructure and deploy the application.
 
@@ -186,8 +118,6 @@ python manage.py dumpdata --database=sqlite --natural-foreign --natural-primary 
 
 python manage.py loaddata datadump.json
 ```
-
-Note 5: Notice lines 33, 34, and 36 of the Jenkinsfile.  You will need to use AWS IAM credentials for this account to use terraform.  However, you cannot upload those credentials to GitHub otherwise your account will be locked immediately.  Again: DO NOT EVER UPLOAD YOUR AWS ACCESS KEYS TO GITHUB OR YOUR ACCOUNT WILL BE LOCKED OUT IMMEDIATELY! (notify an insructor if this happens..).  In order to use your keys, you will need to use Jenkins Secret Manager to store credentials.  Follow the following steps to do so:
 
 1. Create a multibranch pipeline called "Workload_5" and connect your GitHub account.
 
