@@ -359,15 +359,234 @@ rows = cur.fetchall()
 
 How you choose to run these queries is up to you.  You can run them in the terminal, a python script, a jupyter notebook, etc.  
 
+```
+ecommercedb=> \dt
+                    List of relations
+ Schema |            Name            | Type  |   Owner    
+--------+----------------------------+-------+------------
+ public | account_billingaddress     | table | kurac5user
+ public | account_ordermodel         | table | kurac5user
+ public | account_stripemodel        | table | kurac5user
+ public | auth_group                 | table | kurac5user
+ public | auth_group_permissions     | table | kurac5user
+ public | auth_permission            | table | kurac5user
+ public | auth_user                  | table | kurac5user
+ public | auth_user_groups           | table | kurac5user
+ public | auth_user_user_permissions | table | kurac5user
+ public | django_admin_log           | table | kurac5user
+ public | django_content_type        | table | kurac5user
+ public | django_migrations          | table | kurac5user
+ public | django_session             | table | kurac5user
+ public | product_product            | table | kurac5user
+(14 rows)
+```
+
+```
+ecommercedb=> \d auth_user;
+                                        Table "public.auth_user"
+    Column    |           Type           | Collation | Nullable |                Default                
+--------------+--------------------------+-----------+----------+---------------------------------------
+ id           | integer                  |           | not null | nextval('auth_user_id_seq'::regclass)
+ password     | character varying(128)   |           | not null | 
+ last_login   | timestamp with time zone |           |          | 
+ is_superuser | boolean                  |           | not null | 
+ username     | character varying(150)   |           | not null | 
+ first_name   | character varying(150)   |           | not null | 
+ last_name    | character varying(150)   |           | not null | 
+ email        | character varying(254)   |           | not null | 
+ is_staff     | boolean                  |           | not null | 
+ is_active    | boolean                  |           | not null | 
+ date_joined  | timestamp with time zone |           | not null | 
+Indexes:
+    "auth_user_pkey" PRIMARY KEY, btree (id)
+    "auth_user_username_6821ab7c_like" btree (username varchar_pattern_ops)
+    "auth_user_username_key" UNIQUE CONSTRAINT, btree (username)
+Referenced by:
+    TABLE "account_billingaddress" CONSTRAINT "account_billingaddress_user_id_274d1944_fk_auth_user_id" FOREIGN KEY (user_id) REFERENCES auth_user(id) DEFERRABLE INITIALLY DEFERRED
+    TABLE "account_ordermodel" CONSTRAINT "account_ordermodel_user_id_98e8eb0c_fk_auth_user_id" FOREIGN KEY (user_id) REFERENCES auth_user(id) DEFERRABLE INITIALLY DEFERRED
+    TABLE "account_stripemodel" CONSTRAINT "account_stripemodel_user_id_a3f2e757_fk_auth_user_id" FOREIGN KEY (user_id) REFERENCES auth_user(id) DEFERRABLE INITIALLY DEFERRED
+    TABLE "auth_user_groups" CONSTRAINT "auth_user_groups_user_id_6a12ed8b_fk_auth_user_id" FOREIGN KEY (user_id) REFERENCES auth_user(id) DEFERRABLE INITIALLY DEFERRED
+    TABLE "auth_user_user_permissions" CONSTRAINT "auth_user_user_permissions_user_id_a95ead1b_fk_auth_user_id" FOREIGN KEY (user_id) REFERENCES auth_user(id) DEFERRABLE INITIALLY DEFERRED
+    TABLE "django_admin_log" CONSTRAINT "django_admin_log_user_id_c564eba6_fk_auth_user_id" FOREIGN KEY (user_id) REFERENCES auth_user(id) DEFERRABLE INITIALLY DEFERRED
+```
+
+```
+ecommercedb=> \d product_product
+                                      Table "public.product_product"
+   Column    |          Type          | Collation | Nullable |                   Default                   
+-------------+------------------------+-----------+----------+---------------------------------------------
+ id          | bigint                 |           | not null | nextval('product_product_id_seq'::regclass)
+ name        | character varying(200) |           | not null | 
+ description | text                   |           | not null | 
+ price       | numeric(8,2)           |           | not null | 
+ stock       | boolean                |           | not null | 
+ image       | character varying(100) |           |          | 
+Indexes:
+    "product_product_pkey" PRIMARY KEY, btree (id)
+```
+
+```
+ecommercedb=> \d account_billingaddress;
+                                       Table "public.account_billingaddress"
+    Column    |          Type          | Collation | Nullable |                      Default                       
+--------------+------------------------+-----------+----------+----------------------------------------------------
+ id           | bigint                 |           | not null | nextval('account_billingaddress_id_seq'::regclass)
+ name         | character varying(200) |           | not null | 
+ phone_number | character varying(10)  |           | not null | 
+ pin_code     | character varying(6)   |           | not null | 
+ house_no     | character varying(300) |           | not null | 
+ landmark     | character varying(120) |           | not null | 
+ city         | character varying(120) |           | not null | 
+ state        | character varying(120) |           | not null | 
+ user_id      | integer                |           |          | 
+Indexes:
+    "account_billingaddress_pkey" PRIMARY KEY, btree (id)
+    "account_billingaddress_user_id_274d1944" btree (user_id)
+Foreign-key constraints:
+    "account_billingaddress_user_id_274d1944_fk_auth_user_id" FOREIGN KEY (user_id) REFERENCES auth_user(id) DEFERRABLE INITIALLY DEFERRED
+```
+
+```
+ecommercedb=> \d account_stripemodel;
+                                        Table "public.account_stripemodel"
+     Column      |          Type          | Collation | Nullable |                     Default                     
+-----------------+------------------------+-----------+----------+-------------------------------------------------
+ id              | bigint                 |           | not null | nextval('account_stripemodel_id_seq'::regclass)
+ email           | character varying(254) |           |          | 
+ name_on_card    | character varying(200) |           |          | 
+ customer_id     | character varying(200) |           |          | 
+ card_number     | character varying(20)  |           |          | 
+ exp_month       | character varying(2)   |           |          | 
+ exp_year        | character varying(4)   |           |          | 
+ card_id         | text                   |           |          | 
+ address_city    | character varying(120) |           |          | 
+ address_country | character varying(120) |           |          | 
+ address_state   | character varying(120) |           |          | 
+ address_zip     | character varying(6)   |           |          | 
+ user_id         | integer                |           |          | 
+Indexes:
+    "account_stripemodel_pkey" PRIMARY KEY, btree (id)
+    "account_stripemodel_card_number_c69e30bb_like" btree (card_number varchar_pattern_ops)
+    "account_stripemodel_card_number_key" UNIQUE CONSTRAINT, btree (card_number)
+    "account_stripemodel_user_id_a3f2e757" btree (user_id)
+Foreign-key constraints:
+    "account_stripemodel_user_id_a3f2e757_fk_auth_user_id" FOREIGN KEY (user_id) REFERENCES auth_user(id) DEFERRABLE INITIALLY DEFERRED
+```
+
+```
+ecommercedb=> \d account_ordermodel;
+                                        Table "public.account_ordermodel"
+    Column    |           Type           | Collation | Nullable |                    Default                     
+--------------+--------------------------+-----------+----------+------------------------------------------------
+ id           | bigint                   |           | not null | nextval('account_ordermodel_id_seq'::regclass)
+ name         | character varying(120)   |           | not null | 
+ ordered_item | character varying(200)   |           |          | 
+ card_number  | character varying(16)    |           |          | 
+ address      | character varying(300)   |           |          | 
+ paid_status  | boolean                  |           | not null | 
+ paid_at      | timestamp with time zone |           |          | 
+ total_price  | numeric(8,2)             |           |          | 
+ is_delivered | boolean                  |           | not null | 
+ delivered_at | character varying(200)   |           |          | 
+ user_id      | integer                  |           |          | 
+Indexes:
+    "account_ordermodel_pkey" PRIMARY KEY, btree (id)
+    "account_ordermodel_user_id_98e8eb0c" btree (user_id)
+Foreign-key constraints:
+    "account_ordermodel_user_id_98e8eb0c_fk_auth_user_id" FOREIGN KEY (user_id) REFERENCES auth_user(id) DEFERRABLE INITIALLY DEFERRED
+```
+
 Questions: 
 
 1. Create a diagram of the schema and relationship between the tables (keys). (Use draw.io for this question)
 
 2. How many rows of data are there in these tables?  What is the SQL query you would use to find out how many users, products, and orders there are?
 
+```
+ecommercedb=> SELECT COUNT (*) FROM auth_user;
+ count 
+-------
+  3003
+(1 row)
+
+ecommercedb=> SELECT COUNT (*) FROM product_product;
+ count 
+-------
+    33
+(1 row)
+                              ^
+ecommercedb=> SELECT COUNT (*) FROM account_billingaddress;
+ count 
+-------
+  3004
+(1 row)
+
+ecommercedb=> SELECT COUNT (*) FROM account_stripemodel;
+ count 
+-------
+  3002
+(1 row)
+
+ecommercedb=> SELECT COUNT (*) FROM account_ordermodel;
+ count 
+-------
+ 15005
+(1 row)
+```
+
 3. Which states ordered the most products? Least products? Provide the top 5 and bottom 5 states.
 
-4. Of all of the orders placed, which product was the most sold? Please prodide the top 3.
+```
+ecommercedb=> SELECT state, count(*) AS count
+FROM account_ordermodel AS aom
+INNER JOIN account_billingaddress AS aba ON aom.user_id = aba.user_id
+GROUP BY state
+ORDER BY count DESC
+LIMIT 5;
+  state  | count 
+---------+-------
+ Alaska  |   390
+ Ohio    |   386
+ Montana |   381
+ Alabama |   375
+ Texas   |   366
+(5 rows)
+```
+
+```
+ecommercedb=> SELECT state, count(*) AS count
+FROM account_ordermodel AS aom
+INNER JOIN account_billingaddress AS aba ON aom.user_id = aba.user_id
+GROUP BY state
+ORDER BY count ASC
+LIMIT 5;
+  state   | count 
+----------+-------
+ ny       |     1
+ unknown  |     8
+ Delhi    |    16
+ new york |    16
+ Maine    |   224
+(5 rows)
+```
+
+
+4. Of all of the orders placed, which product was the most sold? Please provide the top 3.
+
+```
+ecommercedb=> SELECT ordered_item, count(*) AS count
+FROM account_ordermodel AS aom
+INNER JOIN product_product AS p ON aom.ordered_item = p.name
+GROUP BY ordered_item
+ORDER BY count DESC
+LIMIT 3;
+                             ordered_item                              | count 
+-----------------------------------------------------------------------+-------
+ Logitech G305 Lightspeed Wireless Gaming Mouse (Various Colors)       |   502
+ 2TB Samsung 980 PRO M.2 PCIe Gen 4 x4 NVMe Internal Solid State Drive |   489
+ Arcade1up Marvel vs Capcom Head-to-Head Arcade Table                  |   486
+(3 rows)
+```
 
 Provide the SQL query used to gather this information as well as the answer.
 
