@@ -28,11 +28,7 @@ variable "key_name" {
   default     = "ecommerce"
 }
 
-variable "public_key_path" {
-  description = "Path to the public key file"
-  type        = string
-  default     = "~/.ssh/ecommerce.pub"  # You can also pass this as an environment variable
-}
+variable "public_key_path" {}
 
 ### RDS VARIABLES
 variable rds_address {}
