@@ -86,7 +86,7 @@ backend_private_ip=$(hostname -i | awk '{print $1}')
 sed -i "s/ALLOWED_HOSTS = \[\]/ALLOWED_HOSTS = \['$backend_private_ip'\]/" /home/ubuntu/ecommerce_terraform_deployment/backend/my_project/settings.py || { echo "Backend Private IP failed to update."; exit 1; }
 
 # Configuring RDS DB information in settings.py
-sed -i "s/#'ENGINE': 'django.db.backends.postgresql'/'ENGINE': 'django.db.backends.postgresql'/g" || { echo "Unable to uncomment ENGINE field."; exit 1; }
+sed -i "s/#'ENGINE': 'django.db.backends.postgresql'/'ENGINE': 'django.db.backends.postgresql'/g" /home/ubuntu/ecommerce_terraform_deployment/backend/my_project/settings.py || { echo "Unable to uncomment ENGINE field."; exit 1; }
 sed -i "s/#'NAME': 'your_db_name'/'NAME': '${db_name}'/g" /home/ubuntu/ecommerce_terraform_deployment/backend/my_project/settings.py || { echo "DB Name failed to update."; exit 1; }
 sed -i "s/#'USER': 'your_username'/'USER': '${db_username}'/g" /home/ubuntu/ecommerce_terraform_deployment/backend/my_project/settings.py || { echo "DB Username failed to update."; exit 1; }
 sed -i "s/#'PASSWORD': 'your_password'/'PASSWORD': '${db_password}'/g" /home/ubuntu/ecommerce_terraform_deployment/backend/my_project/settings.py || { echo "DB Password failed to update."; exit 1; }

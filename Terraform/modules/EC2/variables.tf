@@ -25,7 +25,7 @@ variable ami {
 variable "key_name" {
   description = "The name of the key pair"
   type        = string
-  default     = "ecommerce"
+  default     = "ecommerce-tf"
 }
 
 # variable "public_key_path" {}
