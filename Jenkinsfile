@@ -45,11 +45,11 @@ pipeline {
      
       stage('Plan') {
         steps {
-          withCredentials([string(credentialsId: 'AWS_ACCESS_KEY', variable: 'aws_access_key'), 
-                        string(credentialsId: 'AWS_SECRET_KEY', variable: 'aws_secret_key'),
+          withCredentials([string(credentialsId: 'AWS_ACCESS_KEY', variable: 'access_key'), 
+                        string(credentialsId: 'AWS_SECRET_KEY', variable: 'secret_key'),
                         string(credentialsId: 'db_password', variable: 'db_password')]) {
                             dir('Terraform') {
-                              sh 'terraform plan -out plan.tfplan -var="aws_access_key=${aws_access_key}" -var="aws_secret_key=${aws_secret_key}" -var="db_password=${db_password}"' 
+                              sh 'terraform plan -out plan.tfplan -var="access_key=${access_key}" -var="secret_key=${secret_key}" -var="db_password=${db_password}"' 
                             }
           }
         }     
