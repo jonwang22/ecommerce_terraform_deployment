@@ -8,6 +8,7 @@ pipeline {
         source venv/bin/activate
         pip install --upgrade pip
         pip install -r backend/requirements.txt
+        export NODE_OPTIONS=--openssl-legacy-provider
         npm i frontend
         '''
      }
