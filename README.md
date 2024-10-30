@@ -86,62 +86,37 @@ On top of all this we can see what the technologies we'll need to get everything
   - 2x Target Group Attachments, 1x for each Frontend Server at port 3000.
   ```
 
-3. With all the resource blocks written in their respective modules, I needed to determine all my variables and outputs and created variables.tf and outputs.tf for each module. I also created a .tfvars file that holds all my sensitive secrets such as access keys and passwords. If needed, please refer to my terraform code to see what was done. Alot of variables were used and called in root main.tf. The biggest pain point was keeping track of all the outputs needed and dependencies for each resource block. I chose to automate this entire process so the order of creation mattered because certain information like RDS Endpoint isn't known until its created. I set "depends_on" statements for my Backend and Frontend EC2s because they required information like endpoints/private IPs. The flow of dependency went from RDS -> Backend EC2 servers -> Frontend EC2 servers. In order to automate a lot of what I needed to replicate my manual discovery of the tech stack, I used EC2's "User Data" to run scripts. You can find my [3 scripts here](https://github.com/jonwang22/ecommerce_terraform_deployment/tree/main/Terraform/scripts).
+3. With all the resource blocks written in their respective modules, I needed to determine all my variables and outputs and created variables.tf and outputs.tf for each module. I also created a .tfvars file that holds all my sensitive secrets such as access keys and passwords. 
 
+If needed, please refer to my terraform code to see what was done. Alot of variables were used and called in root main.tf. The biggest pain point was keeping track of all the outputs needed and dependencies for each resource block. I chose to automate this entire process so the order of creation mattered because certain information like RDS Endpoint isn't known until its created. I set "depends_on" statements for my Backend and Frontend EC2s because they required information like endpoints/private IPs. The flow of dependency went from RDS -> Backend EC2 servers -> Frontend EC2 servers. In order to automate a lot of what I needed to replicate my manual discovery of the tech stack, I used EC2's "User Data" to run scripts. You can find my [3 scripts here](https://github.com/jonwang22/ecommerce_terraform_deployment/tree/main/Terraform/scripts).
 
-4. Edit the Jenkinsfile with the stages: "Build", "Test", "Init", "Plan", and "Apply" that will build the application, test the application (tests have already been created for this workload- the stage just needs to be edited to activate the venv and paths to the files checked), and then run the Terraform commands to create the infrastructure and deploy the application.
+The reason why I have 3 scripts is because I have a frontend script for my frontend servers, I have 1 backend script that runs the sqlite db migration to RDS, and my second one runs the migration but connects to the RDS instance without loading anything from sqlite. There's an issue if you try to load the datadump.json to RDS you'll hit duplicate errors when RDS only allows for unique identifiers for each row in each table.
 
-Note 1: You will need to create scripts that will run in "User data" section of each of the instances that will set up the front and/or back end servers when Terraform creates them.  Put these scripts into a "Scripts" directory in the GitHub Repo.
+4. After testing my terraform code and manually checking the infrastructure and application works as intended, I moved on to Jenkins. 
 
-Note 2: Recall from the first section of this workload that in order to connect the frontend to the backend you needed to modify the settings.py file and the package.json file.  This can be done manually after the pipeline finishes OR can be automated in the pipeline with the following commands:
+    * Build Stage - This is where we're testing our dependencies and making sure we have everything we need for our application to work and run smoothly both Frontend and Backend.
+    * Test Stage - This is conducting Django pytests on our backend application code to make sure it works properly and we have what we need for our backend migration to RDS from SQLite.
+    * Init Stage - This is where we initialize Terraform for Jenkins to use.
+    * Terraform Destroy - This is solely for the purposes of this deployment, in a production environment it would not be conducive to destroy your production infrastructure. This step is so we can clear out our existing infrastructure and make sure our user_data is being ran correctly on our EC2s to properly set up our Infrastructure. This is a point of optimization. How do we build a pipeline without destroy.
+    * Terraform Plan - This is where our planning happens with Terraform. Terraform plan outputs an output file for us to use on our apply stage.
+    * Terraform Apply - This is where the magic happens. If everything works perfectly and is configured correctly then this should turn into a one-click deploy and build out your infrastructure.
 
-`sed -i 's/ALLOWED_HOSTS = \[\]/ALLOWED_HOSTS = \["your_ip_address"\]/' settings.py`
-
-`sed -i 's/http:\/\/private_ec2_ip:8000/http:\/\/your_ip_address:8000/' package.json`
-
-where `your_ip_address` is replaced with the private IP address of the backend server.  
-
-HINT: You will need to OUTPUT the private IP address and somehow replace the 'your_ip_address' value with what was output. Again, this is optional for those who want to figure it out and create a completely automated process.
-
-Note 3: In order to connect to the RDS database: You will need to first uncomment lines 88-95 of the settings.py file.  The values for the keys: "NAME", "USER", "PASSWORD", "HOST" can again, be configured manually after the infrastructure is provisioned OR automatically as was done above.
-
-Note 4: To LOAD THE DATABASE INTO RDS, the following commands must be run (Hint: in a script or a stage): 
+5. In order for Terraform to know where to create your resources and infrastructure, you'll need to provide Account/User Access Keys. These are very important to keep secret so we'll need to upload these as Jenkins Secrets for Jenkins to use. We'll create an Access Key Pair for our IAM User account and use these to run our Terraform.
 ```
-#Create the tables in RDS: 
-python manage.py makemigrations account
-python manage.py makemigrations payments
-python manage.py makemigrations product
-python manage.py migrate
-
-#Migrate the data from SQLite file to RDS:
-python manage.py dumpdata --database=sqlite --natural-foreign --natural-primary -e contenttypes -e auth.Permission --indent 4 > datadump.json
-
-python manage.py loaddata datadump.json
-```
-
 1. Create a multibranch pipeline called "Workload_5" and connect your GitHub account.
-
 2. AFTER adding your GitHub credentials (with or without saving the multibranch pipeline), navigate to the Jenkins Dashboard and click on "Manage Jenkins" on the left navagation panel.
-
 3. Under "Security", click on "Credentials".
-
 4. You should see the GitHub credentials you just created here.  On that same line, click on "System" and them "Global credentials (unrestricted)". (You should see more details about the GitHub credentials here (Name, Kind, Description))
-
 5. Click on "+ Add Credentials"
-
 6. In the "Kind" Dropdown, select "Secret Text"
-
 7. Under "Secret", put your AWS Access Key.
-
 8. Under "ID", put "AWS_ACCESS_KEY" (without the quotes)
-
 9. Repeat steps 5-8 with your secret access key as "AWS_SECRET_KEY".
 
-Note 1: What is this doing? How does this all translate to terraform being able provision infrastructure?
+Jenkins is taking these credentials and storing and encrypting it for use within the Jenkinsfile as environmental variables. We then call on these credentials to use them with the "withCredentials" step. One thing to note is that your variables that you assign these credentials to are important as they have to match what is being used within Terraform, found within variables.tf. If I had to compare this, it's kind of like having a .tfvars file for Jenkins to use on Terraform. It's not a complete 1 to 1 comparison but the use case is comparable. What we would use as .tfvars file, these Jenkins credentials are what Jenkins would use when running Terraform. I also stored the DB password as well to use.
 
-Note 2: MAKE SURE THAT YOUR main.tf HAS VARIABLES DECLARED FOR `aws_access_key` AND `aws_secret_key`! THERE SHOULD BE NO VALUE TO THESE VARIABLES IN ANY OF THE FILES!
-
-Note 3: You can do this with the RDS password as well.  The "terraform plan" command will need to be modified to accomodate any variable that was declared but has no value.
+DO NOT UPLOAD OR EXPOSE YOUR KEYS ANYWHERE IN ANY FILES!
+```
 
 5. Run the Jenkins Pipeline to create and deploy the infrastructure and application!
 
