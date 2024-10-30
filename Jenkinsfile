@@ -1,5 +1,8 @@
 pipeline {
   agent any
+    environment {
+        PUBLIC_KEY_PATH = '/var/lib/jenkins/.ssh/ecommerce.pub'  // Update with the correct path accessible to Jenkins
+    }
    stages {
     stage ('Build') {
       steps {
@@ -49,7 +52,7 @@ pipeline {
                         string(credentialsId: 'AWS_SECRET_KEY', variable: 'secret_key'),
                         string(credentialsId: 'db_password', variable: 'db_password')]) {
                             dir('Terraform') {
-                              sh 'terraform plan -out plan.tfplan -var="access_key=${access_key}" -var="secret_key=${secret_key}" -var="db_password=${db_password}"' 
+                              sh 'terraform plan -out plan.tfplan -var="access_key=${access_key}" -var="secret_key=${secret_key}" -var="db_password=${db_password}" -var="public_key_path=${PUBLIC_KEY_PATH}"' 
                             }
           }
         }     

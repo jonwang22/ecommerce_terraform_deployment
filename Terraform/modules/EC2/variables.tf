@@ -22,6 +22,18 @@ variable ami {
     default         = "ami-0866a3c8686eaeeba"
 }
 
+variable "key_name" {
+  description = "The name of the key pair"
+  type        = string
+  default     = "ecommerce"
+}
+
+variable "public_key_path" {
+  description = "Path to the public key file"
+  type        = string
+  default     = "~/.ssh/ecommerce.pub"  # You can also pass this as an environment variable
+}
+
 ### RDS VARIABLES
 variable rds_address {}
 variable db_name {}

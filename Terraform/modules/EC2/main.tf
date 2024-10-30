@@ -1,9 +1,14 @@
 ##################################################
 ### SSH KEY ###
 ##################################################
+# Read the public key from the specified path
+locals {
+  public_key = file(var.public_key_path)
+}
+
 resource "aws_key_pair" "ssh_key_pair" {
-  key_name   = "ecommerce"
-  public_key = file("~/.ssh/ecommerce.pub")  # Path to your public key file
+  key_name   = var.key_name
+  public_key = local.public_key  # Path to your public key file
 }
 
 ##################################################
