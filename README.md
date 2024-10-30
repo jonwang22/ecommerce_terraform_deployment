@@ -4,62 +4,48 @@
 ---
 
 
-## Infrastructure as Code
-
-Welcome to Deployment Workload 5! In Workload 4 we built out our infrastructure to increase security and distrubute the resources.  Those are only some aspects of creating a "good system" though.  Let's keep optimizing.
-
-Be sure to document each step in the process and explain WHY each step is important to the pipeline.
-
+## PURPOSE
 A new E-Commerce company wants to deploy their application to AWS Cloud Infrastructure that is secure, available, and fault tolerant.  They also want to utilize Infrastructure as Code as well as a CICD pipeline to be able to spin up or modify infrastructure as needed whenever an update is made to the application source code.  As a growing company they are also looking to leverage data and technology for Business Intelligence to make decisions on where to focus their capital and energy on.
 
-## Instructions
+We're going to be using Terraform to build out our infrastructure and run our application. We can either do this semi-automatically with manual interventions or we can fully automate with Jenkins to perform our terraform deployment.
 
-### Understanding the process
-Before automating the deployment of any application, you should first deploy it "locally" (and manually) to know what the process to set it up is. The following steps 2-11 will guide you to do just that before automating a CICD pipeline.
+The full purpose of this deployment is for us to learn how to deploy infrastructure with Terraform and how to combine Jenkins with Terraform and understand how each tool plays a part in the CI/CD of our application.
 
-IMPORTANT: THE 2 EC2's CREATED FOR THESE FIRST 11 STEPS MUST BE TERMINATED AFTERWARD SO THAT THE ONLY RESOURCES THAT ARE IN THE ACCOUNT ARE FOR JENKINS/TERRAFORM, MONITORING, AND THE INFRASTRUCTURE THAT TERRAFORM CREATES!
+## STEPS
 
-1. Clone this repo to your GitHub account. IMPORTANT: Make sure that the repository name is "ecommerce_terraform_deployment"
+### Understanding the Process
+Before we dive into creating our infrastructure using Terraform, we need to understand the tech stack that we'll be using to deploy our application. This manual discovery is going to inform us on what we need in our infrastructure as well as the setup necessary on each host that we create to connect our infrastructure together for our application to be live and in production.
 
-2. Create 2x t3.micro EC2's.  One EC2 is for the "Frontend" and requires ports 22 and 3000 open.  The other EC2 is for the "Backend" and requires ports 22 and 8000 open.
+The purpose of performing these steps manually is to help us understand what our tech stack needs to do in order to have a functioning ecommerce app. Understanding the requirements and dependencies as well as the connection requirements is key for us automating this process in terraform.
 
-3. In the "Backend" EC2 (Django) clone your source code repository and install `"python3.9", "python3.9-venv", and "python3.9-dev"`
+We'll need this GitHub repo, 2x t3.micro EC2 instances, Security Groups, and software dependencies. 
 
-4. Create a python3.9 virtual environment (venv), activate it, and install the dependencies from the "requirements.txt" file.
-
-5. Modify "settings.py" in the "my_project" directory and update "ALLOWED_HOSTS" to include the private IP of the backend EC2.  
-
-6. Start the Django server by running:
-```
-python manage.py runserver 0.0.0.0:8000
-```
-
-7. In the "Frontend" EC2 (React), clone your source code repository and install Node.js and npm by running:
-```
-curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
-sudo apt install -y nodejs
-```
-
-8. Update "package.json" and modify the "proxy" field to point to the backend EC2 private IP: `"proxy": "http://BACKEND_PRIVATE_IP:8000"`
-
-9. Install the dependencies by running:
-```
-npm i
-```
-
+1. Create one "Frontend" and one "Backend" EC2. Frontend SG - set to 22 for SSH and 3000 for REACT. Backend SG - set to 22 for SSH and 8000 for Django.
+2. Clone the repo to both instances and cd into the repo.
+3. On "Backend" server, install `"python3.9", "python3.9-venv", and "python3.9-dev"`.
+4. Create the python3.9 virtual environment, activate, install dependencies from the  ``./backend/requirements.txt` file.
+5. Modify `./backend/my_project/settings.py`. Update the "ALLOWED_HOSTS" field with the private IP of the "Backend" EC2.
+6. Start the Django server by running `python manage.py runserver 0.0.0.0:8000`
+7. On the "Frontend" server, install Node.js and npm.
+  ```
+  curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+  sudo apt install -y nodejs
+  ```
+8. Update the "package.json" file in `./frontend/`. Modify "proxy" field to point to "Backend" Private IP: `"proxy": "http://BACKEND_PRIVATE_IP:8000"`
+9. Install frontend dependencies by ensuring you're in the `./frontend/` directory and run `npm i`
 10. Set Node.js options for legacy compatibility and start the app:
-```
-export NODE_OPTIONS=--openssl-legacy-provider
-npm start
-```
+  ```
+  export NODE_OPTIONS=--openssl-legacy-provider
+  npm start
+  ```
+11. Once this is complete, we should be able to go to the "Frontend" Public IP at port 3000 and see the ecommerce site with the products.
+12. Delete the two EC2s as this is just a proof of concept and gaining understanding of our tech stack and what we need to make this work.
 
-11. You should be able to enter the public IP address:port 3000 of the Frontend server in a web browser to see the application.  If you are able to see the products, it sucessfully connected to the backend server!  To see what the application looks like if it fails to connect: Navigate to the backend server and stop the Django server by pressing ctrl+c.  Then refresh the webpage.  You should see that the request for the data in the backend failed with a status code.
+This helps us understand our tech stack better. Our Frontend is using React, Backend is Django, Database is SQLite, Infrastructure is AWS.
+On top of all this we can see what the technologies we'll need to get everything up and running, working and connected together.
 
-12.  Destroy the 2 EC2's from the above steps. Again, this was to help you understand the inner workings of a new application with a new tech stack.
 
-NOTE: What is the tech stack?
-
-### IaC and a CICD pipeline
+### INFRASTRUCTURE AS CODE AND CI/CD PIPELINE
 
 1. Create an EC2 t3.medium called "Jenkins_Terraform" for Jenkins and Terraform.
 
