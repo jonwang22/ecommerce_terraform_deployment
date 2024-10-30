@@ -91,8 +91,8 @@ DATABASES = {
        #'PASSWORD': 'your_password',
        #'HOST': 'your-rds-endpoint.amazonaws.com',
        #'PORT': '5432',
-    }, 
-   'sqlite': {
+    #}, 
+   #'sqlite': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
