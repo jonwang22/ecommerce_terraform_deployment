@@ -4,7 +4,7 @@ pipeline {
     stage ('Build') {
       steps {
         sh '''#!/bin/bash
-        <code to build the application>
+        
         '''
      }
    }
@@ -23,7 +23,7 @@ pipeline {
      stage('Init') {
        steps {
           dir('Terraform') {
-            sh 'terraform init' 
+            sh 'terraform init'
             }
         }
       } 

@@ -80,7 +80,7 @@ pip install --upgrade pip
 echo "Installing all necessary application dependencies..."
 pip install -r /home/ubuntu/ecommerce_terraform_deployment/backend/requirements.txt
 
-backend_private_ip=$(hostname -I)
+backend_private_ip=$(hostname -i | awk '{print $1}')
 
 # Configuring Allowed Hosts in settings.py
 sed -i "s/ALLOWED_HOSTS = \[\]/ALLOWED_HOSTS = \['$backend_private_ip'\]/" /home/ubuntu/ecommerce_terraform_deployment/backend/my_project/settings.py || { echo "Backend Private IP failed to update."; exit 1; }
@@ -91,17 +91,12 @@ sed -i "s/'USER': 'your_username'/'USER': '${db_username}'/g" /home/ubuntu/ecomm
 sed -i "s/'PASSWORD': 'your_password'/'PASSWORD': '${db_password}'/g" /home/ubuntu/ecommerce_terraform_deployment/backend/my_project/settings.py || { echo "DB Password failed to update."; exit 1; }
 sed -i "s/'HOST': 'your-rds-endpoint.amazonaws.com'/'HOST': '${rds_address}'/g" /home/ubuntu/ecommerce_terraform_deployment/backend/my_project/settings.py || { echo "DB Host Address failed to update."; exit 1; }
 
-#Create the tables in RDS: 
+# Creating tables in RDS and connecting to RDS
 cd /home/ubuntu/ecommerce_terraform_deployment/backend/
-python manage.py makemigrations account || { echo "Creation for accounts failed."; exit 1; }
-python manage.py makemigrations payments || { echo "Creation for payments failed."; exit 1; }
-python manage.py makemigrations product || { echo "Creation for product failed."; exit 1; }
-python manage.py migrate || { echo "Migration failed."; exit 1; }
-
-#Migrate the data from SQLite file to RDS:
-python manage.py dumpdata --database=sqlite --natural-foreign --natural-primary -e contenttypes -e auth.Permission --indent 4 > datadump.json
-
-python manage.py loaddata datadump.json || { echo "Failed to load datadump.json"; exit 1; }
+python manage.py makemigrations account
+python manage.py makemigrations payments
+python manage.py makemigrations product
+python manage.py migrate
 
 # Start Django Server
 mkdir /home/ubuntu/logs
