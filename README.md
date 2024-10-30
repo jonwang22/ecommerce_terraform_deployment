@@ -118,25 +118,29 @@ Jenkins is taking these credentials and storing and encrypting it for use within
 DO NOT UPLOAD OR EXPOSE YOUR KEYS ANYWHERE IN ANY FILES!
 ```
 
-5. Run the Jenkins Pipeline to create and deploy the infrastructure and application!
+6. Run the Jenkins Pipeline to create and deploy the infrastructure and application! Check the load balancer DNS to make sure you can hit your application.
 
-5. Create a monitoring EC2 called "Monitoring" in the default VPC that will monitor the resources of the various servers.  (Hopefully you read through these instructions in it's entirety before you ran the pipeline so that you could configure the correct ports for node exporter.)
+7. Created a "Monitoring" EC2 Instance in the Default VPC that has Prometheus and Grafana installed. Prometheus has targets on both frontend and backend servers in the Custom VPC.
 
-6. Document! All projects have documentation so that others can read and understand what was done and how it was done. Create a README.md file in your repository that describes:
+## SYSTEM DESIGN DIAGRAM
 
-	  a. The "PURPOSE" of the Workload,
 
-  	b. The "STEPS" taken (and why each was necessary/important),
-    
-  	c. A "SYSTEM DESIGN DIAGRAM" that is created in draw.io (IMPORTANT: Save the diagram as "Diagram.jpg" and upload it to the root directory of the GitHub repo.),
 
-	  d. "ISSUES/TROUBLESHOOTING" that may have occured,
+## ISSUES/TROUBLESHOOTING
 
+1. Creating scripts for the user_data was a big challenge. I was able to formulate the commands to completely setup all 4 servers. 
+
+2. During Jenkins deployment, on the test stage, I found out that the settings.py needed to set sqlite as the default database so I had to keep the section for postgres database commented out and then when we move to terraform apply and move the sqlite DB to RDS, I had to uncomment out that section in settings.py as well as add the respective AZ's backend server's private IP into settings.py ALLOWED_HOSTS and the Frontend package.json "proxy" field.
+
+3. I ran out of storage on my Jenkins server that it disabled my node worker so I had to increase storage in order for Jenkins builds to run.
+
+4. I kept getting this issue and the main reason why is because my user data scripts on my Backend servers did not fully run. I had to dive into my scripts and correct syntax errors to get all my commands to run on my backend servers and fully set it up.
 ```
 * Proxy error: Could not proxy request /api/products/ from 44.211.212.52:3000 to http://10.0.1.92:8000.
 See https://nodejs.org/api/errors.html#errors_common_system_errors for more information (ECONNREFUSED).
 ```
 
+5. I had this issue when trying to spin up my backend server. I had to modify the models.py file within backend/accounts. The Stripemodel for credit card value is set at 16 but I needed to increase it to 20. After increasing that it fixed this issue.
 ```
 Traceback (most recent call last):
 
@@ -199,15 +203,134 @@ Failed to load datadump.json
 2024-10-29 14:39:35,624 - cc_scripts_user.py[WARNING]: Failed to run module scripts_user (scripts in /var/lib/cloud/instance/scripts)
 2024-10-29 14:39:35,624 - util.py[WARNING]: Running module scripts_user (<module 'cloudinit.config.cc_scripts_user' from '/usr/lib/python3/dist-packages/cloudinit/config/cc_scripts_user
 .py'>) failed
-```   		
+```
 
-  e. An "OPTIMIZATION" section for how you think this workload/infrastructure/CICD pipeline, etc. can be optimized further.  
+6. I need to figure out how to use Load Balancers and properly configure them and understand the Health checks that its performing.
 
-  f. A "BUSINESS INTELLIGENCE" section for the questions below,
+## OPTIMIZATION
 
-  g. A "CONCLUSION" statement as well as any other sections you feel like you want to include.
+1. Currently my Terraform code is creating every resource individually that is causing my code to be longer than needed. I think optimizing the code would reduce the amount of code that is within my terraform files.
+
+2. Our RDS Database currently sits within one of the private subnets. The most optimal would be to create a separate subnet for the RDS DB and to create a secondary database if budget allows to have redundancy and also help with the load in case there's more read calls from the backend and that the Primary database is not overloaded.
+
+3. I chose to automate the whole process and deployment. That is optimal to my knowledge however one point of the automation pipeline is the Jenkinsfile. I think there should be a better pipeline to develop and deploy for steps/stages. I'm not sure how to properly refresh the state without tearing down and destroying all the infrastructure so unfortunately theres a terraform destroy stage to reset out environment to redeploy our application. The optimization is figuring out how to remove this destroy command and still be able to update the environment every deployment and build when the source code changes or new features are added.
+
+4. Within my frontend package.json I had to add a flag that forwards my Load Balancer through. See below. I need to remove the `DANGEROUSLY_DISABLE_HOST_CHECK=true HOST=0.0.0.0 PORT=3000` portion.
+
+```
+"scripts": {
+    "start": "DANGEROUSLY_DISABLE_HOST_CHECK=true HOST=0.0.0.0 PORT=3000 react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+```
+
+## BUSINESS INTELLIGENCE
+
+1. Create a diagram of the schema and relationship between the tables (keys). (Use draw.io for this question)
+
+2. How many rows of data are there in these tables?  What is the SQL query you would use to find out how many users, products, and orders there are?
+
+```
+ecommercedb=> SELECT COUNT (*) FROM auth_user;
+ count 
+-------
+  3003
+(1 row)
+
+ecommercedb=> SELECT COUNT (*) FROM product_product;
+ count 
+-------
+    33
+(1 row)
+                              ^
+ecommercedb=> SELECT COUNT (*) FROM account_billingaddress;
+ count 
+-------
+  3004
+(1 row)
+
+ecommercedb=> SELECT COUNT (*) FROM account_stripemodel;
+ count 
+-------
+  3002
+(1 row)
+
+ecommercedb=> SELECT COUNT (*) FROM account_ordermodel;
+ count 
+-------
+ 15005
+(1 row)
+```
+
+3. Which states ordered the most products? Least products? Provide the top 5 and bottom 5 states.
+
+```
+ecommercedb=> SELECT state, count(*) AS count
+FROM account_ordermodel AS aom
+INNER JOIN account_billingaddress AS aba ON aom.user_id = aba.user_id
+GROUP BY state
+ORDER BY count DESC
+LIMIT 5;
+  state  | count 
+---------+-------
+ Alaska  |   390
+ Ohio    |   386
+ Montana |   381
+ Alabama |   375
+ Texas   |   366
+(5 rows)
+```
+
+```
+ecommercedb=> SELECT state, count(*) AS count
+FROM account_ordermodel AS aom
+INNER JOIN account_billingaddress AS aba ON aom.user_id = aba.user_id
+GROUP BY state
+ORDER BY count ASC
+LIMIT 5;
+  state   | count 
+----------+-------
+ ny       |     1
+ unknown  |     8
+ Delhi    |    16
+ new york |    16
+ Maine    |   224
+(5 rows)
+```
+
+
+4. Of all of the orders placed, which product was the most sold? Please provide the top 3.
+
+```
+ecommercedb=> SELECT ordered_item, count(*) AS count
+FROM account_ordermodel AS aom
+INNER JOIN product_product AS p ON aom.ordered_item = p.name
+GROUP BY ordered_item
+ORDER BY count DESC
+LIMIT 3;
+                             ordered_item                              | count 
+-----------------------------------------------------------------------+-------
+ Logitech G305 Lightspeed Wireless Gaming Mouse (Various Colors)       |   502
+ 2TB Samsung 980 PRO M.2 PCIe Gen 4 x4 NVMe Internal Solid State Drive |   489
+ Arcade1up Marvel vs Capcom Head-to-Head Arcade Table                  |   486
+(3 rows)
+```
+
+## CONCLUSION
+
+Terraform is a really powerful DevOps tool. It was really great to work on Terraform with Jenkins to deploy this ecommerce application. Fully automating this to one click deploy is a great feeling as tough as it was to coordinate all the variables, files, and configurations. I can see how powerful this can be and how awesome it is to assist in scaling out infrastructure across regions and providing availability and reliability quickly. Terraform is also provider agnostic and you can use AWS and Azure and Google Cloud all together at once.
+
+
+
+
+
+
 
 ## Business Intelligence
+
+
 
 The database for this application is not empty.  There are many tables but the following are the ones to focus on: "auth_user", "product", "account_billing_address", "account_stripemodel", and "account_ordermodel"
 
