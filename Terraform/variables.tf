@@ -7,7 +7,9 @@ variable secret_key{
   type=string
   sensitive=true
 }
-variable region{}
+variable region{
+  default = "us-east-1"
+}
 
 # RDS Database Variables
 variable db_name {
