@@ -318,60 +318,7 @@ LIMIT 3;
 (3 rows)
 ```
 
-## CONCLUSION
-
-Terraform is a really powerful DevOps tool. It was really great to work on Terraform with Jenkins to deploy this ecommerce application. Fully automating this to one click deploy is a great feeling as tough as it was to coordinate all the variables, files, and configurations. I can see how powerful this can be and how awesome it is to assist in scaling out infrastructure across regions and providing availability and reliability quickly. Terraform is also provider agnostic and you can use AWS and Azure and Google Cloud all together at once.
-
-
-
-
-
-
-
-## Business Intelligence
-
-
-
-The database for this application is not empty.  There are many tables but the following are the ones to focus on: "auth_user", "product", "account_billing_address", "account_stripemodel", and "account_ordermodel"
-
-For each of the following questions (besides #1), you will need to perform SQL queries on the RDS database.  There are multiple methods. here are 2:
-
-a) From the command line, install postgresql so that you can use the psql command to connect to the db with `psql -h <RDS-endpoint> -U <username> -d <database>`. Then run SQL queries like normal from the command line. OR:
-
-b) Use python library `psycopg2` (pip install psycopg2-binary) and connect to the RDS database with the following:
-
-```
-import psycopg2
-
-# Database connection details
-host = "<your-host>"
-port = "5432"  # Default PostgreSQL port
-database = "<your-database>"
-user = "<your-username>"
-password = "<your-password>"
-
-# Establish the connection
-conn = psycopg2.connect(
-    host=host,
-    database=database,
-    user=user,
-    password=password
-)
-
-# Create a cursor object
-cur = conn.cursor()
-```
-
-you can then execute the query with:
-
-```
-cur.execute("SELECT * FROM my_table;")
-
-# Fetch the result of the query
-rows = cur.fetchall()
-```
-
-How you choose to run these queries is up to you.  You can run them in the terminal, a python script, a jupyter notebook, etc.  
+### Database Tables and Keys
 
 ```
 ecommercedb=> \dt
@@ -510,97 +457,45 @@ Foreign-key constraints:
     "account_ordermodel_user_id_98e8eb0c_fk_auth_user_id" FOREIGN KEY (user_id) REFERENCES auth_user(id) DEFERRABLE INITIALLY DEFERRED
 ```
 
-Questions: 
+### METHODS FOR ACCESSING DATABASE
 
-1. Create a diagram of the schema and relationship between the tables (keys). (Use draw.io for this question)
+For each of the following questions (besides #1), you will need to perform SQL queries on the RDS database.  There are multiple methods. here are 2:
 
-2. How many rows of data are there in these tables?  What is the SQL query you would use to find out how many users, products, and orders there are?
+a) From the command line, install postgresql so that you can use the psql command to connect to the db with `psql -h <RDS-endpoint> -U <username> -d <database>`. Then run SQL queries like normal from the command line. OR:
 
-```
-ecommercedb=> SELECT COUNT (*) FROM auth_user;
- count 
--------
-  3003
-(1 row)
-
-ecommercedb=> SELECT COUNT (*) FROM product_product;
- count 
--------
-    33
-(1 row)
-                              ^
-ecommercedb=> SELECT COUNT (*) FROM account_billingaddress;
- count 
--------
-  3004
-(1 row)
-
-ecommercedb=> SELECT COUNT (*) FROM account_stripemodel;
- count 
--------
-  3002
-(1 row)
-
-ecommercedb=> SELECT COUNT (*) FROM account_ordermodel;
- count 
--------
- 15005
-(1 row)
-```
-
-3. Which states ordered the most products? Least products? Provide the top 5 and bottom 5 states.
+b) Use python library `psycopg2` (pip install psycopg2-binary) and connect to the RDS database with the following:
 
 ```
-ecommercedb=> SELECT state, count(*) AS count
-FROM account_ordermodel AS aom
-INNER JOIN account_billingaddress AS aba ON aom.user_id = aba.user_id
-GROUP BY state
-ORDER BY count DESC
-LIMIT 5;
-  state  | count 
----------+-------
- Alaska  |   390
- Ohio    |   386
- Montana |   381
- Alabama |   375
- Texas   |   366
-(5 rows)
+import psycopg2
+
+# Database connection details
+host = "<your-host>"
+port = "5432"  # Default PostgreSQL port
+database = "<your-database>"
+user = "<your-username>"
+password = "<your-password>"
+
+# Establish the connection
+conn = psycopg2.connect(
+    host=host,
+    database=database,
+    user=user,
+    password=password
+)
+
+# Create a cursor object
+cur = conn.cursor()
 ```
 
-```
-ecommercedb=> SELECT state, count(*) AS count
-FROM account_ordermodel AS aom
-INNER JOIN account_billingaddress AS aba ON aom.user_id = aba.user_id
-GROUP BY state
-ORDER BY count ASC
-LIMIT 5;
-  state   | count 
-----------+-------
- ny       |     1
- unknown  |     8
- Delhi    |    16
- new york |    16
- Maine    |   224
-(5 rows)
-```
-
-
-4. Of all of the orders placed, which product was the most sold? Please provide the top 3.
+you can then execute the query with:
 
 ```
-ecommercedb=> SELECT ordered_item, count(*) AS count
-FROM account_ordermodel AS aom
-INNER JOIN product_product AS p ON aom.ordered_item = p.name
-GROUP BY ordered_item
-ORDER BY count DESC
-LIMIT 3;
-                             ordered_item                              | count 
------------------------------------------------------------------------+-------
- Logitech G305 Lightspeed Wireless Gaming Mouse (Various Colors)       |   502
- 2TB Samsung 980 PRO M.2 PCIe Gen 4 x4 NVMe Internal Solid State Drive |   489
- Arcade1up Marvel vs Capcom Head-to-Head Arcade Table                  |   486
-(3 rows)
+cur.execute("SELECT * FROM my_table;")
+
+# Fetch the result of the query
+rows = cur.fetchall()
 ```
 
-Provide the SQL query used to gather this information as well as the answer.
+## CONCLUSION
 
+Terraform is a really powerful DevOps tool. It was really great to work on Terraform with Jenkins to deploy this ecommerce application. Fully automating this to one click deploy is a great feeling as tough as it was to coordinate all the variables, files, and configurations. I can see how powerful this can be and how awesome it is to assist in scaling out infrastructure across regions and providing availability and reliability quickly. Terraform is also provider agnostic and you can use AWS and Azure and Google Cloud all together at once.
