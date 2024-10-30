@@ -8,8 +8,18 @@ pipeline {
         source venv/bin/activate
         pip install --upgrade pip
         pip install -r backend/requirements.txt
+        
+        # Check if Node.js and npm are installed, otherwise install them
+        if ! command -v node &> /dev/null; then
+          curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+          sudo apt-get install -y nodejs
+        fi
+
+        # Installing Frontend
+        cd frontend
         export NODE_OPTIONS=--openssl-legacy-provider
-        npm i frontend
+        export CI=false
+        npm ci
         '''
      }
    }
