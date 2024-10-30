@@ -11,6 +11,13 @@ variable region{
   default = "us-east-1"
 }
 
+# EC2 General Variables
+variable "public_key_path" {
+  description = "Path to the public key file"
+  type        = string
+  default     = "~/.ssh/ecommerce.pub"  # You can also pass this as an environment variable
+}
+
 # RDS Database Variables
 variable db_name {
   description = "The name of the database to create when the DB instance is created"
