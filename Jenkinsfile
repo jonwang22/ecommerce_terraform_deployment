@@ -4,14 +4,18 @@ pipeline {
     stage ('Build') {
       steps {
         sh '''#!/bin/bash
-        
+        python3.9 -m venv venv
+        source venv/bin/activate
+        pip install --upgrade pip
+        pip install -r backend/requirements.txt
+        npm i frontend
         '''
      }
    }
     stage ('Test') {
       steps {
         sh '''#!/bin/bash
-        <code to activate virtual environment>
+        source venv/bin/activate
         pip install pytest-django
         python backend/manage.py makemigrations
         python backend/manage.py migrate
