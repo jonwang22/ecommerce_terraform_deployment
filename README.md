@@ -230,6 +230,8 @@ Failed to load datadump.json
 
 1. Create a diagram of the schema and relationship between the tables (keys). (Use draw.io for this question)
 
+![EntityRelationshipDiagram](https://github.com/user-attachments/assets/d41fd746-005f-4d7e-b860-92be60dc8c77)
+
 2. How many rows of data are there in these tables?  What is the SQL query you would use to find out how many users, products, and orders there are?
 
 ```
