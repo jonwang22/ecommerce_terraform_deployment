@@ -124,7 +124,7 @@ DO NOT UPLOAD OR EXPOSE YOUR KEYS ANYWHERE IN ANY FILES!
 
 ## SYSTEM DESIGN DIAGRAM
 
-
+![Workload5](https://github.com/user-attachments/assets/adae871c-7513-4c44-8412-91a56eed55b3)
 
 ## ISSUES/TROUBLESHOOTING
 
